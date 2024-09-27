@@ -1,5 +1,4 @@
-package org.example;
-
+package br.uam.criptografiaclienteservidor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,12 +10,13 @@ public class Conexao {
 
     public static String receber(Socket socket) throws IOException {
         InputStream in = socket.getInputStream();
+        /* 2048 / 8 = 256 bytes */
         byte infoBytes[] = new byte[256];
         int bytesLidos = in.read(infoBytes);
 
-        if (bytesLidos>0){
+        if (bytesLidos > 0) {
             return Base64.getEncoder().encodeToString(infoBytes);
-        } else{
+        } else {
             return "";
         }
     }
@@ -26,9 +26,9 @@ public class Conexao {
         byte infoBytes[] = new byte[2048];
         int bytesLidos = in.read(infoBytes);
 
-        if (bytesLidos>0){
+        if (bytesLidos > 0) {
             return CriptografiaClienteServidor.bytesParaChave(infoBytes);
-        }else {
+        } else {
             return null;
         }
     }
@@ -38,7 +38,7 @@ public class Conexao {
         out.write(chave.getEncoded());
     }
 
-    public static void enviar(Socket socket, String textoRequisicao) throws IOException{
+    public static void enviar(Socket socket, String textoRequisicao) throws IOException {
         byte[] bytesRequisicao = Base64.getDecoder().decode(textoRequisicao);
         OutputStream out = socket.getOutputStream();
         out.write(bytesRequisicao);

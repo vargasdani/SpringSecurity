@@ -1,63 +1,58 @@
-package org.example;
-
 import java.net.Socket;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Scanner;
-import org.example.Conexao;
 
 public class Client {
+    Socket socket;
 
-    //Socket socket;
+    public void comunicarComServidor() throws Exception {
+        String textoRequisicao = "Conexao estabelecida";
+        String textoRecebido = "";
+        String textoDecifrado = "";
+        String textoCifrado = "";
 
-    public Client() throws Exception {
+        //socket = new Socket("192.168.1.10", 9600);
+        socket = new Socket("localhost", 9600);
 
-
-        public void comunicarComServidor () throws Exception String textoCifrado;
-        {
-            String textoRequisicao = "Conexao estabelecida";
-            String textoRecebido = "";
-            String textoDecifrado = "";
-            String textoCifrado = "";
-
-
-        Socket socket = new Socket("localhost", 9600);
-
-
-        System.out.println("Gerando");
-        KeyPair chaves = CriptografiaClienteServidor.gerarChavePublicoPrivada();
+        // Gerar chave pública e privada
+        System.out.println("Gerando chave RSA...");
+        KeyPair chaves = CriptografiaClienteServidor.gerarChavesPublicoPrivada();
 
         Scanner input = new Scanner(System.in);
-        System.out.println("Recebendo chave publica do servidor...");
+        // receber a chave pública do servidor
+        System.out.println("Recebendo chave pública do servidor...");
         PublicKey chavePublica = Conexao.receberChave(socket);
 
-        System.out.println("Recebendo a chave pública do servidor...");
+        // enviar chave pública para o servidor
+        System.out.println("Enviando chave pública...");
         Conexao.enviarChave(socket, chaves.getPublic());
 
-        System.out.print("\nDigite sua mensagem");
+        System.out.print("\nDigite a sua mensagem: ");
         textoRequisicao = input.nextLine();
 
         textoCifrado = CriptografiaClienteServidor.cifrar(textoRequisicao, chavePublica);
 
-        System.out.println("Mensagem criptografada enviada:" + textoCifrado);
+        // Enviar mensagem para o servidor
+        System.out.println(textoCifrado);
+        Conexao.enviar(socket, textoCifrado);
 
+        // Receber mensagem do servidor
         textoRecebido = Conexao.receber(socket);
 
+        // Decifrar texto do servidor
         textoDecifrado = CriptografiaClienteServidor.decifrar(textoRecebido, chaves.getPrivate());
 
-        System.out.println("\nMensagem criptografada recebida:" + textoRecebido);
-        System.out.println("Servidor enviou" + textoDecifrado);
-
-        public static void main(String[] args){
-            try {
-                Client cliente = new Client();
-                cliente.comunicarComServidor();
-            } catch  (Exception e){
-                e.printStackTrace();
-            }
-        }
-
+        System.out.println("Servidor enviou: " + textoDecifrado);
     }
-}
 
+
+    public static void main(String[] args) {
+        try {
+            Client cliente = new Client();
+            cliente.comunicarComServidor();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 }

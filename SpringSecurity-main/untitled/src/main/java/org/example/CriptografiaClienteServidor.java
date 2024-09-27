@@ -1,15 +1,21 @@
+package br.uam.criptografiaclienteservidor;
 package org.example;
 
 
-import javax.crypto.Cipher;
-import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-public class CriptografiaClienteServidor {
+import javax.crypto.Cipher;
 
-    public static KeyPair gerarChavePublicoPrivada() throws NoSuchAlgorithmException{
+import java.security.KeyFactory;
+import java.security.KeyPair;
+
+public class CriptografiaClienteServidor {
+    public static KeyPair gerarChavesPublicoPrivada() throws NoSuchAlgorithmException{
         KeyPairGenerator geradorChave = KeyPairGenerator.getInstance("RSA");
         geradorChave.initialize(2048);
         KeyPair par = geradorChave.generateKeyPair();
@@ -17,37 +23,33 @@ public class CriptografiaClienteServidor {
     }
 
     public static String
-        cifrar(String mensagem, PublicKey publicKey) throws Exception{
+    cifrar(String mensagem, PublicKey publicKey) throws Exception {
 
-    byte[] messageToBytes = mensagem.getBytes();
-    Cipher cifrador = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        byte[] messageToBytes = mensagem.getBytes();
+        Cipher cifrador = Cipher.getInstance("RSA/ECB/PKCS1Padding");
 
-    //Cifrar mensagem
-    cifrador.init(Cipher.ENCRYPT_MODE, publicKey);
-    byte[] bytesCripto = cifrador.doFinal(messageToBytes);
+        // Cifrar mensagem
+        cifrador.init(Cipher.ENCRYPT_MODE, publicKey);
+        byte[] bytesCripto = cifrador.doFinal(messageToBytes);
 
-    return Base64.getEncoder().encodeToString(bytesCripto);
-
+        return Base64.getEncoder().encodeToString(bytesCripto);
     }
 
     public static String
-        decifrar(String mensagem, PrivateKey privateKey) throws Exception{
+    decifrar(String mensagem, PrivateKey privateKey) throws Exception {
 
-    byte[] bytesCifrados = Base64.getDecoder().decode(mensagem);
-    Cipher cifrador = Cipher.getInstance("RSA/ECA/PKCS1Padding");
+        byte[] bytesCifrados = Base64.getDecoder().decode(mensagem);
+        Cipher cifrador = Cipher.getInstance("RSA/ECB/PKCS1Padding");
 
-    cifrador.init(Cipher.DECRYPT_MODE, privateKey);
-    byte[] mensagemDecifrada = cifrador.doFinal(bytesCifrados);
+        cifrador.init(Cipher.DECRYPT_MODE, privateKey);
+        byte[] mensagemDecifrada = cifrador.doFinal(bytesCifrados);
 
-    return new String(mensagemDecifrada, "UTF8");
-
+        return new String(mensagemDecifrada, "UTF8");
     }
 
-    public static PublicKey bytesParaChave(byte[] bytesChave) throws Exception{
+    public static PublicKey bytesParaChave(byte[] bytesChave) throws Exception {
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(bytesChave);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         return keyFactory.generatePublic(keySpec);
     }
-
-
 }
